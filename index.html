@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AltReady — Fehlende Alt-Texte auf Ihrer WordPress-Seite finden und beheben</title>
+    <meta name="description" content="Alt-Texte in der gesamten WordPress-Mediathek prüfen und per Bulk-Editor korrigieren. WCAG, BFSG und EU Accessibility Act konform. Keine Kosten pro Bild. Made in Europe.">
+    <meta property="og:title" content="AltReady — Alt-Text Manager für WordPress">
+    <meta property="og:description" content="Ihre Website hat Bilder ohne Alt-Text. Jedes einzelne ist ein Barrierefreiheits-Problem und ein SEO-Nachteil. Beheben Sie alle in Minuten.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4F46E5; --primary-dark: #4338CA; --primary-light: #EEF2FF;
+            --red: #DC2626; --red-light: #FEF2F2;
+            --green: #059669; --green-light: #D1FAE5;
+            --amber: #D97706;
+            --gray-50: #F9FAFB; --gray-100: #F3F4F6; --gray-200: #E5E7EB;
+            --gray-500: #6B7280; --gray-700: #374151; --gray-900: #111827;
+        }
+        body { font-family: 'Inter', -apple-system, sans-serif; color: var(--gray-900); line-height: 1.6; background: #fff; }
+        nav { padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary); text-decoration: none; }
+        .logo span { color: var(--gray-900); }
+        .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-link { color: var(--gray-700); text-decoration: none; font-weight: 500; font-size: 0.95rem; }
+        .nav-link:hover { color: var(--primary); }
+        .nav-cta { background: var(--primary); color: #fff; padding: 0.6rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: background 0.2s; }
+        .nav-cta:hover { background: var(--primary-dark); }
+
+        .urgency-bar { background: var(--red-light); border-bottom: 1px solid #FECACA; padding: 0.65rem 2rem; text-align: center; font-size: 0.9rem; color: var(--red); font-weight: 600; }
+
+        .hero { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem 2rem; text-align: center; }
+        .europe-badge { display: inline-flex; align-items: center; gap: 0.4rem; background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; font-weight: 600; font-size: 0.85rem; padding: 0.35rem 1rem; border-radius: 100px; margin-bottom: 1.5rem; }
+        .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        .hero h1 .highlight { background: linear-gradient(135deg, var(--red), #B91C1C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { font-size: 1.2rem; color: var(--gray-500); max-width: 660px; margin: 0 auto 2rem; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-primary { background: var(--primary); color: #fff; padding: 0.85rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1.1rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+        .btn-secondary { background: var(--gray-100); color: var(--gray-700); padding: 0.85rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.2s; }
+        .btn-secondary:hover { background: var(--gray-200); }
+        .price-note { margin-top: 1rem; font-size: 0.9rem; color: var(--gray-500); }
+        .price-note strong { color: var(--gray-700); }
+
+        .stats-bar { max-width: 1000px; margin: 2.5rem auto 0; display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; padding: 2rem; background: var(--gray-50); border-radius: 16px; border: 1px solid var(--gray-200); }
+        .stat { text-align: center; }
+        .stat .number { font-size: 2rem; font-weight: 800; color: var(--primary); }
+        .stat .label { font-size: 0.85rem; color: var(--gray-500); font-weight: 500; }
+        .stat.danger .number { color: var(--red); }
+        .stat.amber .number { color: var(--amber); }
+
+        .trust-bar { display: flex; justify-content: center; gap: 2rem; padding: 2rem; flex-wrap: wrap; }
+        .trust-item { display: flex; align-items: center; gap: 0.5rem; color: var(--gray-500); font-size: 0.9rem; font-weight: 500; }
+        .trust-item .check { color: var(--green); font-weight: 700; }
+
+        .problem { background: var(--gray-900); color: #fff; padding: 4rem 2rem; }
+        .problem-inner { max-width: 800px; margin: 0 auto; text-align: center; }
+        .problem h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
+        .problem p { color: #9CA3AF; font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.7; }
+        .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 2rem; text-align: left; }
+        .problem-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; }
+        .problem-card .icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+        .problem-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .problem-card p { font-size: 0.9rem; color: #9CA3AF; margin: 0; }
+
+        .features { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+        .features h2 { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .features .subtitle { text-align: center; color: var(--gray-500); font-size: 1.1rem; margin-bottom: 3rem; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+        .feature-card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 16px; padding: 2rem; transition: all 0.2s; }
+        .feature-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(79,70,229,0.08); }
+        .feature-icon { width: 48px; height: 48px; background: var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 1.5rem; }
+        .feature-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .feature-card p { color: var(--gray-500); font-size: 0.95rem; }
+
+        .comparison { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+        .comparison h2 { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .comparison .subtitle { text-align: center; color: var(--gray-500); font-size: 1.1rem; margin-bottom: 2.5rem; }
+        .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+        .comparison-table th { text-align: left; padding: 0.75rem 1rem; background: var(--gray-50); border-bottom: 2px solid var(--gray-200); font-weight: 700; }
+        .comparison-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-100); }
+        .comparison-table .alt-col { background: var(--primary-light); font-weight: 600; }
+        .comparison-table .yes { color: var(--green); font-weight: 700; }
+        .comparison-table .no { color: var(--red); }
+        .comparison-table .meh { color: var(--amber); }
+
+        .privacy { background: linear-gradient(135deg, #1E3A5F, #0F172A); color: #fff; padding: 4rem 2rem; text-align: center; }
+        .privacy-inner { max-width: 700px; margin: 0 auto; }
+        .privacy h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
+        .privacy p { color: #94A3B8; font-size: 1.1rem; margin-bottom: 2rem; }
+        .privacy-badges { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .privacy-badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); padding: 0.7rem 1.5rem; border-radius: 100px; font-weight: 600; font-size: 0.9rem; }
+
+        .pricing { max-width: 950px; margin: 0 auto; padding: 4rem 2rem; text-align: center; }
+        .pricing h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .pricing .subtitle { color: var(--gray-500); font-size: 1.1rem; margin-bottom: 3rem; }
+        .pricing-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+        .pricing-card { border: 2px solid var(--gray-200); border-radius: 16px; padding: 2rem; text-align: left; }
+        .pricing-card.featured { border-color: var(--primary); position: relative; }
+        .pricing-card.featured::before { content: "Beliebteste Wahl"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; padding: 0.2rem 1rem; border-radius: 100px; font-size: 0.8rem; font-weight: 700; }
+        .pricing-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .pricing-card .price { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.25rem; }
+        .pricing-card .price span { font-size: 1rem; font-weight: 500; color: var(--gray-500); }
+        .pricing-card .period { color: var(--gray-500); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .pricing-card .savings { color: var(--green); font-weight: 600; font-size: 0.85rem; }
+        .pricing-card ul { list-style: none; margin-bottom: 1.5rem; }
+        .pricing-card ul li { padding: 0.35rem 0; font-size: 0.95rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem; }
+        .pricing-card ul li::before { content: "\2713"; color: var(--green); font-weight: 700; }
+        .pricing-card .btn-primary { display: block; text-align: center; width: 100%; font-size: 1rem; padding: 0.75rem; }
+        .pricing-note { margin-top: 2rem; font-size: 0.9rem; color: var(--gray-500); background: var(--green-light); padding: 1rem; border-radius: 10px; display: inline-block; }
+        .pricing-note strong { color: var(--green); }
+
+        .audience { background: var(--gray-50); padding: 4rem 2rem; border-top: 1px solid var(--gray-200); }
+        .audience-inner { max-width: 1000px; margin: 0 auto; }
+        .audience h2 { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .audience .subtitle { text-align: center; color: var(--gray-500); font-size: 1.1rem; margin-bottom: 2.5rem; }
+        .audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .audience-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 16px; padding: 2rem; }
+        .audience-card .emoji { font-size: 2rem; margin-bottom: 0.75rem; }
+        .audience-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .audience-card p { color: var(--gray-500); font-size: 0.95rem; }
+
+        .faq { max-width: 700px; margin: 0 auto; padding: 4rem 2rem; }
+        .faq h2 { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 2rem; }
+        .faq-item { border-bottom: 1px solid var(--gray-200); padding: 1.25rem 0; }
+        .faq-item h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .faq-item p { color: var(--gray-500); font-size: 0.95rem; }
+
+        .final-cta { background: var(--primary); color: #fff; padding: 4rem 2rem; text-align: center; }
+        .final-cta h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
+        .final-cta p { color: rgba(255,255,255,0.8); font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .btn-white { background: #fff; color: var(--primary); padding: 0.85rem 2.5rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1.1rem; transition: all 0.2s; display: inline-block; }
+        .btn-white:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+        footer { text-align: center; padding: 2rem; color: var(--gray-500); font-size: 0.85rem; border-top: 1px solid var(--gray-200); }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        @media (max-width: 640px) {
+            .hero { padding: 2rem 1.5rem; }
+            .features-grid, .pricing-cards, .audience-grid { grid-template-columns: 1fr; }
+            .stats-bar { gap: 1.5rem; }
+            .comparison-table { font-size: 0.8rem; }
+            .comparison-table th, .comparison-table td { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="urgency-bar">
+        &#9888;&#65039; Das Barrierefreiheitsstärkungsgesetz (BFSG) gilt seit Juni 2025. Fehlende Alt-Texte sind der häufigste WCAG-Verstoß.
+    </div>
+
+    <nav>
+        <a href="#" class="logo">Alt<span>Ready</span></a>
+        <div class="nav-right">
+            <a href="#features" class="nav-link">Funktionen</a>
+            <a href="#pricing" class="nav-link">Preise</a>
+            <a href="#faq" class="nav-link">FAQ</a>
+            <a href="https://checkout.freemius.com/product/25076/plan/41573/" class="nav-cta">Kostenlos testen</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="europe-badge">&#127466;&#127482; Made in Europe &middot; DSGVO-konform</div>
+        <h1>Ihre Website hat Bilder<br>mit <span class="highlight">fehlendem Alt-Text</span></h1>
+        <p>Jeder fehlende Alt-Text ist eine Barriere für sehbehinderte Nutzer, ein rechtliches Risiko seit dem BFSG und eine verpasste SEO-Chance. AltReady findet alle betroffenen Bilder und lässt Sie diese per Bulk-Editor korrigieren.</p>
+        <div class="hero-buttons">
+            <a href="https://checkout.freemius.com/product/25076/plan/41573/" class="btn-primary">Fehlende Alt-Texte finden &rarr;</a>
+            <a href="#pricing" class="btn-secondary">Preise ansehen</a>
+        </div>
+        <p class="price-note">3 Tage kostenlos testen &middot; Keine Kreditkarte nötig &middot; <strong>Festpreis &mdash; keine Kosten pro Bild</strong></p>
+    </section>
+
+    <div class="stats-bar">
+        <div class="stat danger">
+            <div class="number">50%</div>
+            <div class="label">aller Websites haben fehlende Alt-Texte</div>
+        </div>
+        <div class="stat amber">
+            <div class="number">Nr. 1</div>
+            <div class="label">Barrierefreiheits-Verstoß bei Prüfungen</div>
+        </div>
+        <div class="stat">
+            <div class="number">70%</div>
+            <div class="label">mehr Klicks bei Bildern mit Alt-Text</div>
+        </div>
+    </div>
+
+    <div class="trust-bar">
+        <div class="trust-item"><span class="check">&#10003;</span> Kein Konto erforderlich</div>
+        <div class="trust-item"><span class="check">&#10003;</span> Kein Tracking</div>
+        <div class="trust-item"><span class="check">&#10003;</span> 100% lokal &mdash; keine Cloud</div>
+        <div class="trust-item"><span class="check">&#10003;</span> WCAG 2.1 AA konform</div>
+        <div class="trust-item"><span class="check">&#10003;</span> BFSG-konform</div>
+    </div>
+
+    <!-- Demo Video -->
+    <section style="max-width:900px; margin:0 auto; padding:2rem 2rem 0; text-align:center;">
+        <h2 style="font-size:1.5rem; font-weight:800; margin-bottom:0.5rem;">So funktioniert es</h2>
+        <p style="color:var(--gray-500); margin-bottom:1.5rem;">Dashboard → Bulk-Editor → Alt-Texte bearbeiten → Speichern. Fertig in Sekunden.</p>
+        <video autoplay loop muted playsinline style="width:100%; border-radius:12px; border:1px solid var(--gray-200); box-shadow:0 4px 24px rgba(0,0,0,0.1);">
+            <source src="demo.mp4" type="video/mp4">
+        </video>
+    </section>
+
+    <!-- Problem -->
+    <section class="problem">
+        <div class="problem-inner">
+            <h2>Alt-Texte sind keine Option mehr</h2>
+            <p>Das Barrierefreiheitsstärkungsgesetz (BFSG) setzt seit Juni 2025 den European Accessibility Act in deutsches Recht um. Websites müssen barrierefrei sein &mdash; und fehlende Alt-Texte sind der häufigste Verstoß, der bei Prüfungen gefunden wird.</p>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="icon">&#9878;&#65039;</div>
+                    <h3>Rechtliches Risiko</h3>
+                    <p>Das BFSG verpflichtet Unternehmen zur digitalen Barrierefreiheit. Fehlende Alt-Texte sind der häufigste Verstoß bei Barrierefreiheitsprüfungen.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">&#128184;</div>
+                    <h3>Kosten pro Bild summieren sich</h3>
+                    <p>KI-basierte Alt-Text-Tools berechnen 2-4 Cent pro Bild. Bei 5.000 Produktbildern sind das 100-200 € pro Durchlauf.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">&#128564;</div>
+                    <h3>Manuelle Bearbeitung ist mühsam</h3>
+                    <p>Jedes Bild einzeln in der Mediathek öffnen und Alt-Text eingeben &mdash; bei hunderten Bildern eine endlose Arbeit.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <h2>Prüfen, verwalten und korrigieren &mdash; alles in einem Dashboard</h2>
+        <p class="subtitle">Schluss mit dem einzelnen Durchklicken der Mediathek.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#128269;</div>
+                <h3>Kompletter Website-Scan</h3>
+                <p>Findet jedes Bild ohne Alt-Text &mdash; in Beiträgen, Seiten, WooCommerce-Produkten und Custom Post Types. Nichts wird übersehen.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#9889;</div>
+                <h3>Bulk-Editor</h3>
+                <p>Dutzende Alt-Texte auf einem Bildschirm bearbeiten. Auswählen, eintippen, speichern. Kein einzelnes Durchklicken mehr.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128202;</div>
+                <h3>Barrierefreiheits-Dashboard</h3>
+                <p>Alt-Text-Abdeckung auf einen Blick sehen. Fortschritt über die Zeit verfolgen. Immer wissen, wo Sie stehen.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127919;</div>
+                <h3>Intelligente Filter</h3>
+                <p>Filtern nach Beitragstyp, Datum oder Alt-Text-Status. Konzentrieren Sie sich auf die Bilder, die für Ihre Compliance am wichtigsten sind.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128203;</div>
+                <h3>Berichte exportieren</h3>
+                <p>CSV-Berichte für Barrierefreiheits-Audits erstellen. Perfekt für Agenturen, die ihren Kunden Dokumentation liefern.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128274;</div>
+                <h3>100% Datenschutz</h3>
+                <p>Alles läuft lokal auf Ihrem WordPress-Server. Keine Bilder werden an externe APIs gesendet. Keine Cloud. Ihre Daten bleiben bei Ihnen.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="comparison">
+        <h2>AltReady im Vergleich</h2>
+        <p class="subtitle">Ein ehrlicher Vergleich mit anderen Lösungen.</p>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th class="alt-col">AltReady</th>
+                    <th>KI-Alt-Text-Tools</th>
+                    <th>Accessibility Overlays</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Preis</strong></td><td class="alt-col">Ab 4,99 $/Monat (Festpreis)</td><td>2-4 Cent pro Bild</td><td>490-3.990 $/Jahr</td></tr>
+                <tr><td><strong>Unbegrenzte Bilder</strong></td><td class="alt-col yes">&#10003; Immer</td><td class="no">&#10007; Credit-basiert</td><td class="yes">&#10003;</td></tr>
+                <tr><td><strong>Daten bleiben auf Ihrem Server</strong></td><td class="alt-col yes">&#10003; 100% lokal</td><td class="no">&#10007; Cloud-Verarbeitung</td><td class="no">&#10007; Externe Scripts</td></tr>
+                <tr><td><strong>Bulk-Verwaltung</strong></td><td class="alt-col yes">&#10003; Kernfunktion</td><td class="meh">~ Eingeschränkt</td><td class="no">&#10007; Nein</td></tr>
+                <tr><td><strong>Kein Konto nötig</strong></td><td class="alt-col yes">&#10003;</td><td class="no">&#10007; API-Key nötig</td><td class="no">&#10007; Konto nötig</td></tr>
+                <tr><td><strong>DSGVO-konform</strong></td><td class="alt-col yes">&#10003; Keine Daten verlassen die Seite</td><td class="meh">~ Bilder in die Cloud</td><td class="meh">~ Drittanbieter-Scripts</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Audience -->
+    <section class="audience">
+        <div class="audience-inner">
+            <h2>Für alle, die WordPress-Websites betreiben</h2>
+            <p class="subtitle">Ob eigene Website oder Dutzende Kundenprojekte.</p>
+            <div class="audience-grid">
+                <div class="audience-card">
+                    <div class="emoji">&#128722;</div>
+                    <h3>Online-Shops</h3>
+                    <p>Hunderte Produktbilder ohne Alt-Text? Statt pro Bild zu zahlen, alle aus einem Bildschirm heraus verwalten.</p>
+                </div>
+                <div class="audience-card">
+                    <div class="emoji">&#127963;&#65039;</div>
+                    <h3>WordPress-Agenturen</h3>
+                    <p>Alt-Texte über alle Kundenprojekte hinweg effizient verwalten. Compliance-Berichte als CSV exportieren.</p>
+                </div>
+                <div class="audience-card">
+                    <div class="emoji">&#128188;</div>
+                    <h3>Kleine Unternehmen</h3>
+                    <p>Das BFSG betrifft auch Sie. Werden Sie schnell barrierefrei &mdash; ohne einen Entwickler beauftragen zu müssen.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Privacy -->
+    <section class="privacy">
+        <div class="privacy-inner">
+            <h2>&#127466;&#127482; Made in Europe. Ihre Daten gehören Ihnen.</h2>
+            <p>AltReady läuft vollständig auf Ihrem WordPress-Server. Keine Cloud, keine externen APIs, kein Tracking. DSGVO-konform by Design &mdash; nicht nur auf dem Papier.</p>
+            <div class="privacy-badges">
+                <span class="privacy-badge">&#128274; Kein Konto nötig</span>
+                <span class="privacy-badge">&#128225; Keine externen Aufrufe</span>
+                <span class="privacy-badge">&#128683; Kein Tracking</span>
+                <span class="privacy-badge">&#128190; 100% lokale Verarbeitung</span>
+                <span class="privacy-badge">&#127466;&#127482; DSGVO by Design</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <h2>Einfache Preise. Keine Kosten pro Bild. Niemals.</h2>
+        <p class="subtitle">3 Tage kostenlos testen. Keine Kreditkarte erforderlich.</p>
+        <div class="pricing-cards">
+            <div class="pricing-card">
+                <h3>Monatlich</h3>
+                <div class="price">$4,99 <span>/Monat</span></div>
+                <div class="period">Monatlich kündbar</div>
+                <ul>
+                    <li>Unbegrenzte Bilder</li>
+                    <li>Kompletter Website-Scan</li>
+                    <li>Bulk-Editor</li>
+                    <li>Barrierefreiheits-Dashboard</li>
+                    <li>CSV-Berichte</li>
+                    <li>Prioritäts-Support</li>
+                </ul>
+                <a href="https://checkout.freemius.com/product/25076/plan/41573/?billing_cycle=monthly" class="btn-primary">3 Tage kostenlos testen</a>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Jährlich</h3>
+                <div class="price">$49,99 <span>/Jahr</span></div>
+                <div class="period">Jährliche Abrechnung</div>
+                <div class="savings">17% günstiger als monatlich</div>
+                <ul>
+                    <li>Alles aus Monatlich</li>
+                    <li>Unbegrenzte Bilder</li>
+                    <li>Alle zukünftigen Updates</li>
+                    <li>Barrierefreiheits-Dashboard</li>
+                    <li>CSV-Berichte</li>
+                    <li>Prioritäts-Support</li>
+                </ul>
+                <a href="https://checkout.freemius.com/product/25076/plan/41573/?billing_cycle=annual" class="btn-primary">3 Tage kostenlos testen</a>
+            </div>
+            <div class="pricing-card">
+                <h3>Lifetime</h3>
+                <div class="price">$149,99</div>
+                <div class="period">Einmalzahlung &middot; Für immer</div>
+                <div class="savings">Bester langfristiger Wert</div>
+                <ul>
+                    <li>Alles aus Jährlich</li>
+                    <li>Lebenslange Updates</li>
+                    <li>Lebenslanger Support</li>
+                    <li>Keine laufenden Kosten</li>
+                    <li>Unbegrenzte Bilder</li>
+                    <li>Alle zukünftigen Funktionen</li>
+                </ul>
+                <a href="https://checkout.freemius.com/product/25076/plan/41573/?billing_cycle=lifetime" class="btn-primary">Lifetime-Zugang kaufen</a>
+            </div>
+        </div>
+        <div class="pricing-note">
+            <strong>&#10003; Keine Kosten pro Bild.</strong> Scannen und bearbeiten Sie unbegrenzt viele Bilder. Anders als bei KI-Tools steigen Ihre Kosten nicht mit der Größe Ihrer Mediathek.
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <h2>Häufig gestellte Fragen</h2>
+        <div class="faq-item">
+            <h3>Was ist das BFSG und warum betrifft es mich?</h3>
+            <p>Das Barrierefreiheitsstärkungsgesetz (BFSG) setzt den European Accessibility Act in deutsches Recht um. Seit Juni 2025 müssen kommerzielle Websites barrierefrei sein. Fehlende Alt-Texte sind der häufigste Verstoß, der bei Prüfungen festgestellt wird.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Wie unterscheidet sich AltReady von KI-Alt-Text-Generatoren?</h3>
+            <p>KI-Tools wie AltText.ai berechnen pro Bild (2-4 Cent) und senden Ihre Bilder an externe Server. AltReady ist ein Verwaltungstool &mdash; es hilft Ihnen, fehlende Alt-Texte zu finden und per Bulk-Editor zu korrigieren. Ohne Kosten pro Bild und ohne Datenübertragung.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Funktioniert es mit WooCommerce?</h3>
+            <p>Ja. AltReady scannt alle WordPress-Inhalte einschließlich WooCommerce-Produktbilder, Galerie-Bilder und Varianten-Bilder.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Funktioniert es mit Page Buildern?</h3>
+            <p>Ja. AltReady scannt direkt die WordPress-Mediathek und funktioniert unabhängig vom Page Builder &mdash; Elementor, Divi, Gutenberg, WPBakery und mehr.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Wird meine Website dadurch langsamer?</h3>
+            <p>Nein. AltReady läuft nur im WordPress-Admin, wenn Sie es verwenden. Es hat keinerlei Auswirkungen auf die Ladezeit Ihrer Website für Besucher.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Sind meine Daten sicher?</h3>
+            <p>Absolut. AltReady läuft 100% lokal auf Ihrem Server. Keine Daten werden irgendwohin gesendet &mdash; keine Cloud, keine externen APIs, kein Tracking. Made in Europe, DSGVO-konform by Design.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Was passiert, wenn meine Lizenz abläuft?</h3>
+            <p>Das Plugin funktioniert weiter. Sie erhalten nur keine Updates und keinen Support mehr, bis Sie verlängern. Ihre Daten und Einstellungen sind nie betroffen.</p>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="final-cta">
+        <h2>Finden Sie Ihre fehlenden Alt-Texte &mdash; heute noch</h2>
+        <p>3 Tage kostenlos. Keine Kreditkarte. Installation in 2 Minuten. Sie wissen sofort, wo Sie stehen.</p>
+        <a href="https://checkout.freemius.com/product/25076/plan/41573/" class="btn-white">Kostenlos testen &rarr;</a>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 JennySaas &middot; <a href="mailto:jennysaas34@gmail.com">Kontakt</a> &middot; Made with &#10084;&#65039; in Europe &middot; <a href="https://jennysaas.github.io/altready/">English version</a></p>
+    </footer>
+</body>
+</html>
